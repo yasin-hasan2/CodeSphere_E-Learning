@@ -1,0 +1,86 @@
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { userLoggedIn, userLoggedOut } from "../authSlice";
+
+const USER_API = "http://localhost:6001/api/v1/user/";
+
+export const authApi = createApi({
+  reducerPath: "authApi",
+  baseQuery: fetchBaseQuery({
+    baseUrl: USER_API,
+    credentials: "include",
+  }),
+  endpoints: (builder) => ({
+    registerUser: builder.mutation({
+      query: (inputData) => ({
+        url: "register",
+        method: "POST",
+        body: inputData,
+      }),
+    }),
+    loginUser: builder.mutation({
+      query: (inputData) => ({
+        url: "login",
+        method: "POST",
+        body: inputData,
+      }),
+      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+        try {
+          const result = await queryFulfilled;
+          console.log("Login result ", result);
+          // dispatch action to set user and isAuthenticated in authSlice
+          dispatch(userLoggedIn({ user: result.data.user }));
+        } catch (error) {
+          console.log("Login error in authApi ", error);
+        }
+      },
+    }),
+    logOutUser: builder.mutation({
+      query: () => ({
+        url: "logout",
+        method: "GET",
+      }),
+      async onQueryStarted(_, { dispatch }) {
+        try {
+          // console.log("Login result ", result);
+          // dispatch action to set user and isAuthenticated in authSlice
+          dispatch(userLoggedOut({ user: null }));
+        } catch (error) {
+          console.log("Login error in authApi ", error);
+        }
+      },
+    }),
+    loadUser: builder.query({
+      // query to load user profile
+      query: () => ({
+        url: "profile",
+        method: "GET",
+      }),
+      async onQueryStarted(_, { queryFulfilled, dispatch }) {
+        try {
+          const result = await queryFulfilled;
+          // console.log("Login result ", result);
+          // dispatch action to set user and isAuthenticated in authSlice
+          dispatch(userLoggedIn({ user: result.data.user }));
+        } catch (error) {
+          console.log("Login error in authApi ", error);
+        }
+      },
+    }),
+    updateUser: builder.mutation({
+      query: (formData) => ({
+        url: "profile/update",
+        method: "PUT",
+        body: formData,
+        credentials: "include",
+      }),
+    }),
+  }),
+});
+
+export const {
+  useRegisterUserMutation,
+  useLoginUserMutation,
+  useLogOutUserMutation,
+  useLoadUserQuery,
+  useUpdateUserMutation,
+} = authApi;
