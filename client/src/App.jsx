@@ -18,7 +18,7 @@ import CreateLecture from "./pages/instructor/lecture/CreateLecture";
 import EditLecture from "./pages/instructor/lecture/EditLecture";
 import CourseDetail from "./pages/student/CourseDetail";
 import CourseProgress from "./pages/student/CourseProgress";
-import SearchPage from "./pages/student/searchPage";
+import SearchPage from "./pages/student/SearchPage";
 import {
   AuthenticatedUser,
   ProtectedRoutes,
