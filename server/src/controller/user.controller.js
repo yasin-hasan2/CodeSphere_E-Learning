@@ -111,11 +111,9 @@ export const logout = async (req, res) => {
   try {
     return res
       .status(200)
-      .cookie("token", token, {
+      .cookie("token", "", {
         maxAge: 0,
         httpOnly: true,
-        secure: true,
-        sameSite: "none",
         expires: new Date(0),
       })
       .json({
