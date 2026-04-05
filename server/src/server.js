@@ -71,19 +71,19 @@ app.get("/home", (req, res) => {
 //   });
 // }
 
-if (process.env.NODE_ENV === "production") {
-  const clientPath = path.join(__dirname, "../client/dist");
+// if (process.env.NODE_ENV === "production") {
+//   const clientPath = path.join(__dirname, "../client/dist");
 
-  app.use(express.static(clientPath));
+//   app.use(express.static(clientPath));
 
-  app.use((req, res) => {
-    res.sendFile(path.join(clientPath, "index.html"));
-  });
-}
-// else {
-//   app.get("/", (req, res) => {
-//     res.send("API is running....");
+//   app.use((req, res) => {
+//     res.sendFile(path.join(clientPath, "index.html"));
 //   });
+// }
+// else {
+app.get("/", (req, res) => {
+  res.send("API is running....");
+});
 // }
 
 // start the server
