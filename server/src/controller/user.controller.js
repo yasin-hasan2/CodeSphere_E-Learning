@@ -96,7 +96,7 @@ export const login = async (req, res) => {
     generateToken(
       res,
       user,
-      `Welcome back, ${user.name}! You are logged in successfully`
+      `Welcome back, ${user.name}! You are logged in successfully`,
     );
   } catch (error) {
     console.log("Login controller error", error);
@@ -111,9 +111,11 @@ export const logout = async (req, res) => {
   try {
     return res
       .status(200)
-      .cookie("token", "", {
+      .cookie("token", token, {
         maxAge: 0,
         httpOnly: true,
+        secure: true,
+        sameSite: "none",
         expires: new Date(0),
       })
       .json({
