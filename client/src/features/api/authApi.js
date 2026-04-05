@@ -5,12 +5,23 @@ import { userLoggedIn, userLoggedOut } from "../authSlice";
 //   import.meta.env.MODE === "development"
 //     ? "http://localhost:6001/api/v1/user/"
 //     : "https://codesphere-lms.onrender.com/api/v1/user/";
-const USER_API =
-  import.meta.env.MODE === "development"
-    ? "https://codesphere-e-learning-1.onrender.com/api/v1/user/"
-    : "/api/v1/user/";
+// const USER_API =
+//   import.meta.env.MODE === "development"
+//     ? "https://codesphere-e-learning-1.onrender.com/api/v1/user/"
+//     : "/api/v1/user/";
 
-// const USER_API = "http://localhost:6001/api/v1/user/";
+// =============================================== if you are using proxy in development then use this base url
+// Final structure (recommended)
+// VITE_API_URL=https://codesphere-e-learning-1.onrender.com/api/v1
+// // authApi
+// baseUrl: `${BASE_URL}/user`
+
+// // courseApi
+// baseUrl: `${BASE_URL}/course`
+
+// ===============================================
+
+const USER_API = import.meta.env.VITE_API_URL + "/user/";
 
 export const authApi = createApi({
   reducerPath: "authApi",
