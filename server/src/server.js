@@ -18,7 +18,7 @@ import courseProgressRoute from "./routes/courseProgress.route.js";
 connectDb();
 
 const app = express();
-const PORT = process.env.PORT || 6000;
+const PORT = process.env.PORT || 6001;
 
 const __dirname = path.resolve();
 

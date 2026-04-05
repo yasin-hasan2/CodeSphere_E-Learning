@@ -5,7 +5,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 //     : "https://codesphere-lms.onrender.com/api/v1/course/";
 const COURSE_API_URL =
   import.meta.env.MODE === "development"
-    ? "http://localhost:6001/api/v1/course/"
+    ? "https://codesphere-e-learning-1.onrender.com/api/v1/course/"
     : "/api/v1/course/";
 
 // const COURSE_API_URL = "http://localhost:6001/api/v1/course/";

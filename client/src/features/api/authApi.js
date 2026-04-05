@@ -7,7 +7,7 @@ import { userLoggedIn, userLoggedOut } from "../authSlice";
 //     : "https://codesphere-lms.onrender.com/api/v1/user/";
 const USER_API =
   import.meta.env.MODE === "development"
-    ? "http://localhost:6001/api/v1/user/"
+    ? "https://codesphere-e-learning-1.onrender.com/api/v1/user/"
     : "/api/v1/user/";
 
 // const USER_API = "http://localhost:6001/api/v1/user/";
