@@ -26,11 +26,11 @@ const __dirname = path.resolve();
 app.use(express.json());
 app.use(cookieParser());
 const allowedOrigins = [
-  "http://localhost:5173",
+  // "http://localhost:5173",
   // "http://localhost:3000",
   // "http://127.0.0.1:5173",
   // "http://localhost:6001",
-  // "https://codesphere-lms-client.vercel.app",
+  "https://code-sphere-e-learning.vercel.app",
 ];
 
 app.use(
