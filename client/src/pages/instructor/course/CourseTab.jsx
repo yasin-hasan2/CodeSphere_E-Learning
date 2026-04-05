@@ -3,18 +3,16 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -26,294 +24,236 @@ import {
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import LoadingSpinner from "@/components/shared/LoadingSpinner";
 import { toast } from "sonner";
 
 function CourseTab() {
-  // FIX 1: Start with null so we wait for API data
   const [input, setInput] = useState(null);
+  const [previewThumbnail, setPreviewThumbnail] = useState("");
 
   const navigate = useNavigate();
   const { courseId } = useParams();
 
-  const {
-    data: courseByData,
-    isLoading: courseByIdLoading,
-    refetch,
-  } = useGetCourseByIdQuery(courseId);
-  // console.log("courseByData:", courseByData);
-  const [publishCourse, {}] = usePublishCourseMutation();
+  const { data, isLoading, refetch } = useGetCourseByIdQuery(courseId);
 
-  const [previewThumbnail, setPreviewThumbnail] = useState("");
-  const [editCourse, { data, isLoading, isSuccess, error }] =
-    useEditCourseMutation();
+  const [editCourse, { isLoading: updating }] = useEditCourseMutation();
 
-  // LOAD API DATA INTO INPUT
+  const [publishCourse] = usePublishCourseMutation();
+
   useEffect(() => {
-    if (courseByData?.course) {
-      const course = courseByData.course;
-
+    if (data?.course) {
+      const c = data.course;
       setInput({
-        courseTitle: course.courseTitle || "",
-        subTitle: course.subTitle || "",
-        description: course.description || "",
-        category: course.category || "",
-        courseLevel: course.courseLevel || "",
-        coursePrice: course.coursePrice || "",
+        courseTitle: c.courseTitle || "",
+        subTitle: c.subTitle || "",
+        description: c.description || "",
+        category: c.category || "",
+        courseLevel: c.courseLevel || "",
+        coursePrice: c.coursePrice || "",
         courseThumbnail: "",
-        oldThumbnail: course.courseThumbnail || "",
+        oldThumbnail: c.courseThumbnail || "",
       });
     }
-  }, [courseByData]);
+  }, [data]);
 
-  // PUBLISH / UNPUBLISH COURSE
-  const publishStatusHandler = async (action) => {
-    try {
-      const response = await publishCourse({
-        courseId,
-        query: action,
-      }).unwrap();
-      toast.success(
-        response.message ||
-          `Course ${action ? "published" : "unpublished"} successfully`
-      );
-      refetch();
-      // if (response.data) {
-      //   refetch();
-      //   toast.success(response.data.message || "Publish status updated");
-      // }
-    } catch (error) {
-      console.log(error);
-      toast.error("Failed to update publish status");
-    }
-  };
+  if (isLoading || !input) return <LoadingSpinner />;
 
-  // SUCCESS / ERROR HANDLING
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success(data.message || "Course updated successfully");
-      navigate("/teacher/courses");
-    }
-    if (error) {
-      toast.error(error.data?.message || "Failed to update course");
-    }
-  }, [isSuccess, error, data, navigate]);
-
-  // FIX 2: Do not load UI until input filled
-  if (!input) return <p>Loading...</p>;
-
-  const changeEventHandler = (e) => {
-    const { name, value } = e.target;
-    setInput({ ...input, [name]: value });
-  };
-
-  const selectCategory = (value) => {
-    setInput({ ...input, category: value });
-  };
-
-  const selectCourseLevel = (value) => {
-    setInput({ ...input, courseLevel: value });
-  };
-
-  // FILE SELECT
-  const selectThumbnail = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setInput({ ...input, courseThumbnail: file });
-
-      const reader = new FileReader();
-      reader.onloadend = () => setPreviewThumbnail(reader.result);
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // SUBMIT
   const updateCourseHandler = async () => {
     const formData = new FormData();
 
-    formData.append("courseTitle", input.courseTitle);
-    formData.append("subTitle", input.subTitle);
-    formData.append("description", input.description);
-    formData.append("category", input.category);
-    formData.append("courseLevel", input.courseLevel);
-    formData.append("coursePrice", input.coursePrice);
-
-    if (input.courseThumbnail) {
-      formData.append("courseThumbnail", input.courseThumbnail);
-    }
+    Object.keys(input).forEach((key) => {
+      if (key !== "oldThumbnail" && input[key]) {
+        formData.append(key, input[key]);
+      }
+    });
 
     await editCourse({ formData, courseId });
+    toast.success("Course updated");
   };
 
-  const categories = [
-    "React",
-    "Next JS",
-    "Data Science",
-    "Frontend Development",
-    "Fullstack Development",
-    "MERN Stack Development",
-    "Javascript",
-    "Python",
-    "Docker",
-    "MongoDB",
-    "HTML",
-    "Others",
-  ];
+  const publishHandler = async () => {
+    const action = data?.course?.isPublished ? "false" : "true";
+    await publishCourse({ courseId, query: action });
+    refetch();
+    toast.success("Publish status updated");
+  };
 
-  const courseLevels = ["Beginner", "Intermediate", "Advanced", "All Levels"];
+  const selectThumbnail = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  if (courseByIdLoading) {
-    return <p>Loading...</p>;
-  }
+    setInput({ ...input, courseThumbnail: file });
+
+    const reader = new FileReader();
+    reader.onloadend = () => setPreviewThumbnail(reader.result);
+    reader.readAsDataURL(file);
+  };
 
   return (
-    <div>
-      <Card>
-        <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div>
-            <CardTitle>Basic Course Information</CardTitle>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* 🔥 LEFT: FORM */}
+      <div className="lg:col-span-2">
+        <Card className="rounded-2xl">
+          <CardHeader>
+            <CardTitle>Edit Course</CardTitle>
             <CardDescription>
-              Make changes to your course here. Click save when you're done.
+              Update your course information and settings
             </CardDescription>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              disabled={courseByData?.course?.lectures.length === 0}
-              variant="outline"
-              onClick={() =>
-                publishStatusHandler(
-                  courseByData?.course.isPublished ? "false" : "true"
-                )
-              }
-            >
-              {courseByData?.course.isPublished ? "Unpublish " : "Publish "}
-            </Button>
-            <Button>Remove Course</Button>
-          </div>
-        </CardHeader>
+          </CardHeader>
 
-        <CardContent>
-          <div className="space-y-4 mt-5">
-            {/* Title */}
-            <div>
-              <Label>Title</Label>
+          <CardContent className="space-y-6">
+            {/* TITLE */}
+            <div className="space-y-2">
+              <Label>Course Title</Label>
               <Input
-                type="text"
-                name="courseTitle"
                 value={input.courseTitle}
-                onChange={changeEventHandler}
-                placeholder="Ex. Fullstack Developer"
+                onChange={(e) =>
+                  setInput({ ...input, courseTitle: e.target.value })
+                }
               />
             </div>
 
-            {/* Subtitle */}
-            <div>
+            {/* SUBTITLE */}
+            <div className="space-y-2">
               <Label>Subtitle</Label>
               <Input
-                type="text"
-                name="subTitle"
                 value={input.subTitle}
-                onChange={changeEventHandler}
-                placeholder="Ex. Become a fullstack developer from scratch"
+                onChange={(e) =>
+                  setInput({ ...input, subTitle: e.target.value })
+                }
               />
             </div>
 
-            {/* Description */}
-            <div>
+            {/* DESCRIPTION */}
+            <div className="space-y-2">
               <Label>Description</Label>
               <RichTextEditor input={input} setInput={setInput} />
             </div>
 
-            {/* Category + Level + Price */}
-            <div className="flex items-center gap-5">
-              <div>
+            {/* GRID FIELDS */}
+            <div className="grid md:grid-cols-3 gap-4">
+              {/* CATEGORY */}
+              <div className="space-y-2">
                 <Label>Category</Label>
-                <Select value={input.category} onValueChange={selectCategory}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Category</SelectLabel>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Course Level</Label>
                 <Select
-                  value={input.courseLevel}
-                  onValueChange={selectCourseLevel}
+                  value={input.category}
+                  onValueChange={(v) => setInput({ ...input, category: v })}
                 >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select level" />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {courseLevels.map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {level}
+                    {[
+                      "React",
+                      "Next JS",
+                      "Fullstack",
+                      "Python",
+                      "Database",
+                    ].map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              <div>
-                <Label>Price (TK)</Label>
+              {/* LEVEL */}
+              <div className="space-y-2">
+                <Label>Level</Label>
+                <Select
+                  value={input.courseLevel}
+                  onValueChange={(v) => setInput({ ...input, courseLevel: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Beginner", "Intermediate", "Advanced"].map((l) => (
+                      <SelectItem key={l} value={l}>
+                        {l}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* PRICE */}
+              <div className="space-y-2">
+                <Label>Price</Label>
                 <Input
                   type="number"
-                  name="coursePrice"
                   value={input.coursePrice}
-                  onChange={changeEventHandler}
-                  placeholder="Ex. 5000"
-                  className="w-fit"
+                  onChange={(e) =>
+                    setInput({
+                      ...input,
+                      coursePrice: e.target.value,
+                    })
+                  }
                 />
               </div>
             </div>
 
-            {/* Thumbnail */}
-            <div>
-              <Label>Course Thumbnail</Label>
-              <Input type="file" onChange={selectThumbnail} accept="image/*" />
-
-              {/* Preview selected */}
-              {previewThumbnail ? (
-                <img src={previewThumbnail} className="w-64 my-2" />
-              ) : (
-                input.oldThumbnail && (
-                  <img src={input.oldThumbnail} className="w-64 my-2" />
-                )
-              )}
-            </div>
-
-            <div>
+            {/* ACTIONS */}
+            <div className="flex justify-between pt-4">
               <Button
+                variant="ghost"
                 onClick={() => navigate("/teacher/courses")}
-                variant="outline"
               >
                 Cancel
               </Button>
 
-              <Button disabled={isLoading} onClick={updateCourseHandler}>
-                {isLoading ? (
+              <Button onClick={updateCourseHandler} disabled={updating}>
+                {updating ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Please wait
+                    <Loader2 className="animate-spin mr-2" />
+                    Saving...
                   </>
                 ) : (
                   "Save Changes"
                 )}
               </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 🔥 RIGHT: SIDEBAR */}
+      <div className="space-y-6">
+        {/* THUMBNAIL */}
+        <Card className="rounded-2xl">
+          <CardHeader>
+            <CardTitle>Thumbnail</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Input type="file" onChange={selectThumbnail} />
+
+            <img
+              src={previewThumbnail || input.oldThumbnail}
+              className="rounded-xl w-full object-cover"
+            />
+          </CardContent>
+        </Card>
+
+        {/* PUBLISH */}
+        <Card className="rounded-2xl">
+          <CardContent className="p-4 space-y-3">
+            <Button
+              onClick={publishHandler}
+              className="w-full"
+              variant="outline"
+            >
+              {data?.course?.isPublished
+                ? "Unpublish Course"
+                : "Publish Course"}
+            </Button>
+
+            <Button variant="destructive" className="w-full">
+              Delete Course
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

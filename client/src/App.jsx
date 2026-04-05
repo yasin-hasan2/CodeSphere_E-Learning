@@ -7,6 +7,7 @@ import HeroSection from "./pages/student/HeroSection";
 import MainLayout from "./layout/MainLayout";
 import { RouterProvider } from "react-router";
 import Courses from "./pages/student/Courses";
+import ErrorPage from "./pages/ErrorPage";
 import MyLearning from "./pages/student/MyLearning";
 import Profile from "./pages/student/Profile";
 import Sidebar from "./pages/instructor/Sidebar";
@@ -26,28 +27,51 @@ import {
 } from "./router/ProtectedRoutes";
 import PurchaseCourseProtectedRoute from "./router/PurchaseCourseProtectedRoute";
 import { ThemeProvider } from "./components/shared/ThemeProvider";
+import AuthLayout from "./layout/AuthLayout";
+import { FeatureCategories } from "./components/shared/FeatureCategories";
+import { FeaturedCourses } from "./components/shared/FeaturedCourses";
+import { WhyChooseUs } from "./components/shared/WhyChooseUs";
+import { PopularCourses } from "./components/shared/PopularCourses";
+import { StatsSection } from "./components/shared/StatsSection";
+import { TestimonialSection } from "./components/shared/TestimonialSection";
+import { CTASection } from "./components/shared/CTASection";
+import { CallBookingSection } from "./components/shared/CallBookingSection";
 
 const appRouter = createBrowserRouter([
   {
+    element: <AuthLayout />, // ❌ Navbar থাকবে না
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      // {
+      //   path: "/signup",
+      //   element: <Login />, // or separate Signup page
+      // },
+    ],
+  },
+  {
     path: "/",
     element: <MainLayout />,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: "/",
         element: (
           <>
             <HeroSection />
+            <FeatureCategories />
             <Courses />
+            <FeaturedCourses />
+            <WhyChooseUs />
+            <PopularCourses />
+            <StatsSection />
+            <TestimonialSection />
+            <CallBookingSection />
+            <CTASection />
           </>
-        ),
-      },
-      {
-        path: "login",
-        element: (
-          <AuthenticatedUser>
-            {" "}
-            <Login />
-          </AuthenticatedUser>
         ),
       },
       {
@@ -83,6 +107,10 @@ const appRouter = createBrowserRouter([
             </PurchaseCourseProtectedRoute>
           </ProtectedRoutes>
         ),
+      },
+      {
+        path: "*",
+        element: <ErrorPage />,
       },
       // admin routes start from here
       {

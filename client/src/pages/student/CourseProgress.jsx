@@ -1,201 +1,190 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import {
   useGetCourseProgressQuery,
   useMarkCourseAsCompletedMutation,
   useMarkCourseAsInCompleteMutation,
   useUpdateLectureProgressMutation,
 } from "@/features/api/CourseProgressApi";
-import { CheckCircle, CheckCircle2, CirclePlay } from "lucide-react";
+import {
+  CheckCircle,
+  CheckCircle2,
+  CirclePlay,
+  PlayCircle,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
+import LoadingSpinner from "@/components/shared/LoadingSpinner";
+import ErrorPage from "@/pages/ErrorPage";
 
 function CourseProgress() {
-  const params = useParams();
-  const courseId = params.courseId;
+  const { courseId } = useParams();
+
   const { data, isLoading, isError, refetch } =
-    useGetCourseProgressQuery(courseId); // Replace "courseId" with actual course ID
+    useGetCourseProgressQuery(courseId);
+
   const [updateLectureProgress] = useUpdateLectureProgressMutation();
-  const [
-    markCourseAsCompleted,
-    {
-      data: completedData,
-      isSuccess: completedSuccess,
-      isError: completedError,
-    },
-  ] = useMarkCourseAsCompletedMutation();
+
+  const [markCourseAsCompleted, { isSuccess, isError: completeError }] =
+    useMarkCourseAsCompletedMutation();
+
   const [markCourseAsInComplete, { data: inCompleteData }] =
     useMarkCourseAsInCompleteMutation();
+
   const [currentLecture, setCurrentLecture] = useState(null);
 
   useEffect(() => {
-    if (completedSuccess) {
-      refetch(); // Refetch the course progress to get updated data
-      toast.success(completedData?.message || "Course marked as completed.");
-    } else if (completedError) {
-      toast.error("Failed to mark course as completed.");
+    if (isSuccess) {
+      refetch();
+      toast.success("Course marked as completed 🎉");
+    }
+    if (completeError) {
+      toast.error("Something went wrong");
     }
     if (inCompleteData) {
-      refetch(); // Refetch the course progress to get updated data
-      toast.success(inCompleteData?.message || "Course marked as incomplete.");
+      refetch();
+      toast.success("Marked as incomplete");
     }
-  }, [
-    completedSuccess,
-    completedError,
-    completedData,
-    inCompleteData,
-    refetch,
-  ]);
+  }, [isSuccess, completeError, inCompleteData]);
 
-  if (isLoading) {
-    return <div>Loading course progress...</div>;
-  }
-  if (isError) {
-    return <div>Error loading course progress.</div>;
-  }
-  console.log("Course Progress Data:", data);
+  if (isLoading) return <LoadingSpinner />;
+  if (isError) return <ErrorPage />;
+
   const { course, courseProgress, completed } = data.data;
-  const { courseTitle } = course;
-  // console.log("viewed lectures:", courseProgress);
 
-  // initialize the first lecture as current lecture
-  const initialLecture =
+  const activeLecture =
     currentLecture || (course.lectures && course.lectures[0]);
 
-  const isLectureCompleted = (lectureId) => {
-    return courseProgress.some(
-      (prog) => prog.lectureId === lectureId && prog.viewed
-    );
-  };
+  const isLectureCompleted = (id) =>
+    courseProgress.some((p) => p.lectureId === id && p.viewed);
 
-  const handleLectureProgress = async (lectureId) => {
-    try {
-      await updateLectureProgress({
-        courseId,
-        lectureId,
-        viewed: true,
-      }).unwrap();
-      refetch(); // Refetch the course progress to get updated data
-    } catch (error) {
-      console.error("Failed to update lecture progress:", error);
-    }
-  };
-
-  // Handle select a spacific lecture to watch
-  const handleSelectLecture = (lecture) => {
+  const handleSelectLecture = async (lecture) => {
     setCurrentLecture(lecture);
-    handleLectureProgress(lecture._id);
+    await updateLectureProgress({
+      courseId,
+      lectureId: lecture._id,
+      viewed: true,
+    });
+    refetch();
   };
 
-  // course lecture progress handler
-  const handleCompleteCourse = async () => {
-    try {
-      await markCourseAsCompleted(courseId);
-    } catch (error) {
-      console.error("Failed to mark course as completed:", error);
-    }
-  };
-  const handleInCompleteCourse = async () => {
-    try {
-      await markCourseAsInComplete(courseId);
-    } catch (error) {
-      console.error("Failed to mark course as completed:", error);
-    }
-  };
+  const completedCount = courseProgress.filter((p) => p.viewed).length;
+  const progressPercent = Math.round(
+    (completedCount / course.lectures.length) * 100,
+  );
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto p-4">
-        {/* Display course name  */}
-        <div className="flex justify-between mb-4">
-          <h1 className="text-2xl font-bold">{courseTitle}</h1>
-          <Button
-            onClick={completed ? handleInCompleteCourse : handleCompleteCourse}
-            variant={completed ? "outline" : "default"}
-          >
-            {completed ? (
-              <div className="flex items-center">
-                <CheckCircle className="h-4 w-4 mr-2" /> <span>Completed</span>{" "}
-              </div>
-            ) : (
-              "Mark as completed"
-            )}
-          </Button>
+    <div className="max-w-7xl mx-auto px-4 py-6 mt-10">
+      {/* 🔥 HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">{course.courseTitle}</h1>
+
+          {/* Progress bar */}
+          <div className="mt-2 w-full md:w-80 bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <p className="text-sm text-gray-500 mt-1">
+            {completedCount}/{course.lectures.length} lectures completed
+          </p>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Video section  */}
-          <div className="flex-1 md:w-3/5 h-fit rounded-lg shadow-lg p-4">
-            <div>
-              <video
-                src={currentLecture?.videoUrl || initialLecture.videoUrl}
-                controls
-                className="w-full h-auto md:rounded-lg"
-                onPlay={() =>
-                  handleLectureProgress(
-                    currentLecture?._id || initialLecture._id
-                  )
-                }
-              />
-            </div>
-            {/* Display current watching lecture title */}
-            <div className="mt-2 ">
-              <h3 className="font-medium text-lg">
-                {`Lecture ${
-                  course.lectures.findIndex(
-                    (lec) =>
-                      lec._id === (currentLecture?._id || initialLecture._id)
-                  ) + 1
-                } : ${
-                  currentLecture?.lectureTitle || initialLecture.lectureTitle
-                }`}
-              </h3>
-            </div>
+        <Button
+          onClick={
+            completed
+              ? () => markCourseAsInComplete(courseId)
+              : () => markCourseAsCompleted(courseId)
+          }
+          className={`flex items-center gap-2 ${
+            completed ? "bg-green-500 hover:bg-green-600" : ""
+          }`}
+        >
+          {completed ? (
+            <>
+              <CheckCircle size={16} /> Completed
+            </>
+          ) : (
+            "Mark Complete"
+          )}
+        </Button>
+      </div>
+
+      {/* 🔥 MAIN LAYOUT */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* 🎥 VIDEO SECTION */}
+        <div className="lg:col-span-2 bg-black rounded-2xl overflow-hidden shadow-xl">
+          <video
+            src={activeLecture?.videoUrl}
+            controls
+            className="w-full h-[250px] md:h-[450px] object-cover"
+            onPlay={() =>
+              updateLectureProgress({
+                courseId,
+                lectureId: activeLecture._id,
+                viewed: true,
+              })
+            }
+          />
+
+          <div className="p-5 bg-white dark:bg-gray-900">
+            <h2 className="text-lg font-semibold">
+              Lecture{" "}
+              {course.lectures.findIndex((l) => l._id === activeLecture._id) +
+                1}
+              : {activeLecture.lectureTitle}
+            </h2>
           </div>
-          {/* Lecture Sidebar  */}
-          <div className="flex flex-col w-full md:w-2/5 border-t md:border-t-0 md:border-l border-gray-200 md:pl-4 pt-4 md:pt-0">
-            <h2 className="font-semibold text-xl mb-4">Course Lecture</h2>
-            <div className="flex-1 overflow-y-auto">
-              {course?.lectures.map((lecture) => (
-                <Card
+        </div>
+
+        {/* 📚 SIDEBAR */}
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-4 h-[500px] overflow-y-auto">
+          <h2 className="font-semibold text-lg mb-4">Course Content</h2>
+
+          <div className="space-y-3">
+            {course.lectures.map((lecture, index) => {
+              const active = lecture._id === activeLecture._id;
+
+              return (
+                <div
                   key={lecture._id}
-                  className={`mb-3 hover:cursor-pointer transition transform ${
-                    lecture._id === currentLecture?._id
-                      ? "bg-gray-200 dark:dark:bg-gray-800"
-                      : ""
-                  } `}
                   onClick={() => handleSelectLecture(lecture)}
+                  className={`p-4 rounded-xl cursor-pointer transition-all duration-300 border
+                  ${
+                    active
+                      ? "bg-blue-50 border-blue-500 shadow-md"
+                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`}
                 >
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex items-center">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {/* Icon */}
                       {isLectureCompleted(lecture._id) ? (
-                        <CheckCircle2
-                          size={24}
-                          className="text-green-500 mr-2"
-                        />
+                        <CheckCircle2 className="text-green-500" />
                       ) : (
-                        <CirclePlay size={24} className="text-gray-500 mr-2" />
+                        <PlayCircle className="text-gray-400" />
                       )}
+
                       <div>
-                        <CardTitle className="text-lg font-medium">
-                          {lecture.lectureTitle}
-                        </CardTitle>
+                        <p className="text-sm font-medium line-clamp-1">
+                          {index + 1}. {lecture.lectureTitle}
+                        </p>
                       </div>
                     </div>
+
+                    {/* Badge */}
                     {isLectureCompleted(lecture._id) && (
-                      <Badge
-                        variant={"outline"}
-                        className="bg-green-200 text-green-600"
-                      >
-                        Completed
+                      <Badge className="bg-green-100 text-green-600 text-xs">
+                        Done
                       </Badge>
                     )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

@@ -355,7 +355,7 @@ export const removeLecture = async (req, res) => {
     // delete lecture from any course that contains it
     await Course.updateOne(
       { lectures: lectureId }, // find course containing the lecture
-      { $pull: { lectures: lectureId } } // remove lectureId from lectures array
+      { $pull: { lectures: lectureId } }, // remove lectureId from lectures array
     );
 
     // await Lecture.findByIdAndDelete(lectureId);

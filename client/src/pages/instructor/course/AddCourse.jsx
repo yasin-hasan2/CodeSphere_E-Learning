@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { useCreateCourseMutation } from "@/features/api/courseApi";
 import { Loader2 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -25,88 +25,91 @@ const AddCourse = () => {
 
   const navigate = useNavigate();
 
-  const getSelectedCategory = (value) => {
-    setCategory(value);
-  };
-
   const createCourseHandler = async () => {
+    if (!courseTitle || !category) {
+      return toast.error("Please fill all fields");
+    }
     await createCourse({ courseTitle, category });
   };
 
-  //   // for displaying toast
   useEffect(() => {
     if (isSuccess) {
-      toast.success(data?.message || "Course created.");
+      toast.success(data?.message || "Course created successfully");
       navigate("/teacher/courses");
     }
-  }, [isSuccess, error, data, navigate]);
+  }, [isSuccess, data, navigate]);
 
   return (
-    <div className="flex-1 mx-10">
-      <div className="mb-4">
-        <h1 className="font-bold text-xl">
-          Lets add course, add some basic course details for your new course
-        </h1>
-        <p className="text-sm">
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Possimus,
-          laborum!
-        </p>
-      </div>
-      <div className="space-y-4">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50 dark:bg-[#0f0f0f]">
+      {/* 🔥 CARD */}
+      <div className="w-full max-w-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm p-8 space-y-6">
+        {/* HEADER */}
         <div>
-          <Label>Title</Label>
-          <Input
-            type="text"
-            value={courseTitle}
-            onChange={(e) => setCourseTitle(e.target.value)}
-            placeholder="Your Course Name"
-          />
+          <h1 className="text-2xl font-bold">Create New Course</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Add basic details to get started with your course
+          </p>
         </div>
-        <div>
-          <Label>Category</Label>
-          <Select onValueChange={getSelectedCategory}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Category</SelectLabel>
-                <SelectItem value="React">React</SelectItem>
-                <SelectItem value="Next JS">Next JS</SelectItem>
-                <SelectItem value="Data Science">Data Science</SelectItem>
-                <SelectItem value="Frontend Development">
-                  Frontend Development
-                </SelectItem>
-                <SelectItem value="Fullstack Development">
-                  Fullstack Development
-                </SelectItem>
-                <SelectItem value="MERN Stack Development">
-                  MERN Stack Development
-                </SelectItem>
-                <SelectItem value="Javascript">Javascript</SelectItem>
-                <SelectItem value="Python">Python</SelectItem>
-                <SelectItem value="Docker">Docker</SelectItem>
-                <SelectItem value="MongoDB">MongoDB</SelectItem>
-                <SelectItem value="HTML">HTML</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+
+        {/* FORM */}
+        <div className="space-y-5">
+          {/* TITLE */}
+          <div className="space-y-2">
+            <Label>Course Title</Label>
+            <Input
+              type="text"
+              value={courseTitle}
+              onChange={(e) => setCourseTitle(e.target.value)}
+              placeholder="e.g. Complete MERN Stack Bootcamp"
+              className="h-11"
+            />
+          </div>
+
+          {/* CATEGORY */}
+          <div className="space-y-2">
+            <Label>Category</Label>
+            <Select onValueChange={(value) => setCategory(value)}>
+              <SelectTrigger className="w-full h-11">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Categories</SelectLabel>
+                  <SelectItem value="React">React</SelectItem>
+                  <SelectItem value="Next JS">Next JS</SelectItem>
+                  <SelectItem value="Fullstack">
+                    Fullstack Development
+                  </SelectItem>
+                  <SelectItem value="MERN">MERN Stack</SelectItem>
+                  <SelectItem value="Python">Python</SelectItem>
+                  <SelectItem value="Data Science">Data Science</SelectItem>
+                  <SelectItem value="Docker">Docker</SelectItem>
+                  <SelectItem value="MongoDB">MongoDB</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => navigate("/teacher/courses")}
-          >
-            Back
+
+        {/* ACTIONS */}
+        <div className="flex items-center justify-between pt-4">
+          <Button variant="ghost" onClick={() => navigate("/teacher/courses")}>
+            ← Back
           </Button>
-          <Button disabled={isLoading} onClick={createCourseHandler}>
+
+          <Button
+            disabled={isLoading}
+            onClick={createCourseHandler}
+            className="px-6"
+          >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Please wait
+                Creating...
               </>
             ) : (
-              "Create"
+              "Create Course"
             )}
           </Button>
         </div>
@@ -114,7 +117,5 @@ const AddCourse = () => {
     </div>
   );
 };
-
-// 11:32
 
 export default AddCourse;

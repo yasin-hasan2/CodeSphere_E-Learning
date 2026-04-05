@@ -104,127 +104,126 @@ const Login = () => {
   ]);
 
   return (
-    <div className="flex items-center w-full justify-center mt-20">
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="w-[400px]"
-      >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="signup">Signup</TabsTrigger>
-          <TabsTrigger value="login">Login</TabsTrigger>
-        </TabsList>
+    <div className="min-h-screen flex">
+      {/* LEFT SIDE (Branding) */}
+      <div className="hidden md:flex w-1/2 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 items-center justify-center p-10">
+        <div className="text-center text-white space-y-6">
+          <div className="text-6xl font-bold tracking-tight">{"</>"}</div>
+          <h1 className="text-4xl font-semibold leading-tight">
+            Learn. Build. Grow.
+          </h1>
+          <p className="text-sm text-white/80 max-w-sm mx-auto">
+            CodeSphere helps you level up your development skills with
+            real-world learning.
+          </p>
+        </div>
+      </div>
 
-        {/* Signup Section */}
-        <TabsContent value="signup">
-          <Card>
-            <CardHeader>
-              <CardTitle>Signup</CardTitle>
-              <CardDescription>
-                Create a new account and click signup when you're done.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-6">
-              <div className="grid gap-3">
-                <Label>Name</Label>
-                <Input
-                  type="text"
-                  placeholder="Eg. Pedro Duarte"
-                  name="name"
-                  value={signupInput.name}
-                  onChange={(e) => changeInputHandler(e, "signup")}
-                />
-              </div>
-              <div className="grid gap-3">
-                <Label>Email</Label>
-                <Input
-                  type="email"
-                  placeholder="Eg. peduarte@gmail.com"
-                  name="email"
-                  value={signupInput.email}
-                  onChange={(e) => changeInputHandler(e, "signup")}
-                />
-              </div>
-              <div className="grid gap-3">
-                <Label>Password</Label>
-                <Input
-                  type="password"
-                  placeholder="Eg. xyz@123"
-                  name="password"
-                  value={signupInput.password}
-                  onChange={(e) => changeInputHandler(e, "signup")}
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-center">
-              <Button
-                disabled={registerIsLoading}
-                onClick={() => handleRegistration("signup")}
-                className="w-full"
+      {/* RIGHT SIDE (Auth Card) */}
+      <div className="flex w-full md:w-1/2 items-center justify-center bg-slate-950 px-6">
+        <div className="w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-6 space-y-6">
+          {/* Logo */}
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-white">CodeSphere</h2>
+            <p className="text-sm text-zinc-400">Welcome back 👋</p>
+          </div>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid grid-cols-2 bg-white/10 rounded-lg p-1">
+              <TabsTrigger
+                value="login"
+                className="data-[state=active]:bg-white data-[state=active]:text-black rounded-md"
               >
-                {registerIsLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please
-                    wait...
-                  </>
-                ) : (
-                  "Signup"
-                )}
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
+                Login
+              </TabsTrigger>
+              <TabsTrigger
+                value="signup"
+                className="data-[state=active]:bg-white data-[state=active]:text-black rounded-md"
+              >
+                Signup
+              </TabsTrigger>
+            </TabsList>
 
-        {/* Login Section */}
-        <TabsContent value="login">
-          <Card>
-            <CardHeader>
-              <CardTitle>Login</CardTitle>
-              <CardDescription>
-                Enter your credentials to access your account.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-6">
-              <div className="grid gap-3">
-                <Label>Email</Label>
+            {/* LOGIN */}
+            <TabsContent value="login">
+              <div className="space-y-4 mt-4">
                 <Input
                   type="email"
+                  placeholder="Email"
                   name="email"
                   value={loginInput.email}
                   onChange={(e) => changeInputHandler(e, "login")}
-                  placeholder="Eg. peduarte@gmail.com"
+                  className="bg-white/5 border-white/10 text-white"
                 />
-              </div>
-              <div className="grid gap-3">
-                <Label>Password</Label>
+
                 <Input
                   type="password"
+                  placeholder="Password"
                   name="password"
                   value={loginInput.password}
                   onChange={(e) => changeInputHandler(e, "login")}
-                  placeholder="Eg. xyz@123"
+                  className="bg-white/5 border-white/10 text-white"
                 />
+
+                <Button
+                  disabled={loginIsLoading}
+                  onClick={() => handleRegistration("login")}
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90"
+                >
+                  {loginIsLoading ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Login"
+                  )}
+                </Button>
               </div>
-            </CardContent>
-            <CardFooter className="flex justify-center">
-              <Button
-                disabled={loginIsLoading}
-                onClick={() => handleRegistration("login")}
-                className="w-full"
-              >
-                {loginIsLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please
-                    wait...
-                  </>
-                ) : (
-                  "Login"
-                )}
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+
+            {/* SIGNUP */}
+            <TabsContent value="signup">
+              <div className="space-y-4 mt-4">
+                <Input
+                  placeholder="Name"
+                  name="name"
+                  value={signupInput.name}
+                  onChange={(e) => changeInputHandler(e, "signup")}
+                  className="bg-white/5 border-white/10 text-white"
+                />
+
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  name="email"
+                  value={signupInput.email}
+                  onChange={(e) => changeInputHandler(e, "signup")}
+                  className="bg-white/5 border-white/10 text-white"
+                />
+
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  name="password"
+                  value={signupInput.password}
+                  onChange={(e) => changeInputHandler(e, "signup")}
+                  className="bg-white/5 border-white/10 text-white"
+                />
+
+                <Button
+                  disabled={registerIsLoading}
+                  onClick={() => handleRegistration("signup")}
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90"
+                >
+                  {registerIsLoading ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Create Account"
+                  )}
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,18 +1,14 @@
-// import React from 'react'
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import Course from "./Course";
 import {
   useLoadUserQuery,
@@ -20,185 +16,143 @@ import {
 } from "@/features/api/authApi";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Camera } from "lucide-react";
+import LoadingSpinner from "@/components/shared/LoadingSpinner";
 
 function Profile() {
   const [name, setName] = useState("");
   const [profilePhoto, setProfilePhoto] = useState(null);
+
   const { data, isLoading, refetch } = useLoadUserQuery();
-  // console.log("User profile data ", data, isLoading);
-  const [
-    updateUser,
-    {
-      data: updateUserData,
-      isLoading: updateUserIsLoading,
-      error: updateUserError,
-      isSuccess: updateUserIsSuccess,
-    },
-  ] = useUpdateUserMutation();
 
-  console.log(data);
+  const [updateUser, { isLoading: updating, isSuccess, error }] =
+    useUpdateUserMutation();
 
-  const onChangeHandler = (e) => {
+  const user = data?.user;
+
+  useEffect(() => {
+    if (user?.name) setName(user.name);
+  }, [user]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Profile updated");
+      refetch();
+    }
+    if (error) {
+      toast.error(error?.data?.message || "Update failed");
+    }
+  }, [isSuccess, error]);
+
+  const handleFile = (e) => {
     const file = e.target.files?.[0];
-    if (!file) {
-      return "File not selected";
-    }
-    if (file) {
-      return setProfilePhoto(file);
-    }
+    if (file) setProfilePhoto(file);
   };
 
-  // const user = {
-  //   name: "John Doe",
-  //   email: "john@hmail.com",
-  //   role: "student",
-  //   photoUrl: "",
-  //   enrolledCourses: [1, 2],
-  // };
-
-  const updateUserHandler = async () => {
-    // create a form data object
-    // console.log(name, profilePhoto);
+  const handleUpdate = async () => {
     const formData = new FormData();
     formData.append("name", name);
     if (profilePhoto) formData.append("profilePhoto", profilePhoto);
     await updateUser(formData);
   };
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  if (isLoading) return <LoadingSpinner />;
 
-  useEffect(() => {
-    if (updateUserIsSuccess) {
-      refetch();
-      toast.success(updateUserData?.message || "Profile updated successfully");
-    }
-    if (updateUserError) {
-      toast.error(updateUserError?.data?.message || "Error updating profile");
-    }
-    // prefill name input field
-  }, [
-    updateUserData,
-    updateUserError,
-    updateUserIsSuccess,
-    updateUserIsLoading,
-    refetch,
-  ]);
-
-  if (isLoading) {
-    return <h1>Profile Loading...</h1>;
-  }
-  const user = data && data?.user;
-  // console.log(user);
-
-  // const updateUserIsLoading = false;
   return (
-    <div>
-      <div className="max-w-4xl mx-auto px-4 my-10">
-        <h1 className="font-bold text-2xl text-center md:text-left">PROFILE</h1>
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-8 my-5">
-          <div className="flex flex-col items-center">
-            <Avatar className="h-24 w-24 md:h-32 md:w-32 mb-4">
-              <AvatarImage
-                src={user?.photoUrl || "https://github.com/shadcn.png"}
-                alt="@shadcn"
-              />
-              <AvatarFallback>CN</AvatarFallback>
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* 🔥 PROFILE HEADER */}
+      <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 md:p-10 text-white shadow-xl">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+          {/* Avatar */}
+          <div className="relative">
+            <Avatar className="h-28 w-28 md:h-36 md:w-36 border-4 border-white shadow-lg">
+              <AvatarImage src={user?.photoUrl} />
+              <AvatarFallback>U</AvatarFallback>
             </Avatar>
+
+            {/* Camera icon */}
+            <label className="absolute bottom-2 right-2 bg-white text-black p-2 rounded-full cursor-pointer shadow">
+              <Camera size={16} />
+              <input type="file" onChange={handleFile} hidden />
+            </label>
           </div>
-          <div>
-            <div className="mb-2">
-              <h1 className="font-semibold text-gray-900 dark:text-gray-100 ">
-                Name:
-                <span className="font-normal text-gray-700 dark:text-gray-300 ml-2">
-                  {user?.name}
-                </span>
-              </h1>
-            </div>
-            <div className="mb-2">
-              <h1 className="font-semibold text-gray-900 dark:text-gray-100 ">
-                Email:
-                <span className="font-normal text-gray-700 dark:text-gray-300 ml-2">
-                  {user?.email}
-                </span>
-              </h1>
-            </div>
-            <div className="mb-2">
-              <h1 className="font-semibold text-gray-900 dark:text-gray-100 ">
-                Role:
-                <span className="font-normal text-gray-700 dark:text-gray-300 ml-2">
-                  {user?.role.toUpperCase()}
-                </span>
-              </h1>
-            </div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="sm" className="mt-2">
-                  Edit Profile
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Edit Profile</DialogTitle>
-                  <DialogDescription>
-                    Make changes to your profile here. Click save when you're
-                    done.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label>Name</Label>
+
+          {/* Info */}
+          <div className="text-center md:text-left">
+            <h1 className="text-2xl md:text-3xl font-bold">{user?.name}</h1>
+            <p className="text-sm opacity-90">{user?.email}</p>
+
+            <span className="inline-block mt-2 text-xs bg-white/20 px-3 py-1 rounded-full">
+              {user?.role?.toUpperCase()}
+            </span>
+
+            {/* Edit button */}
+            <div className="mt-4">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="bg-white text-black hover:bg-gray-200">
+                    Edit Profile
+                  </Button>
+                </DialogTrigger>
+
+                <DialogContent className="rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Edit Profile</DialogTitle>
+                  </DialogHeader>
+
+                  <div className="space-y-4 py-4">
                     <Input
-                      type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Name"
-                      className="col-span-3"
+                      placeholder="Your name"
                     />
+
+                    <Input type="file" accept="image/*" onChange={handleFile} />
                   </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label>Profile Photo</Label>
-                    <Input
-                      onChange={onChangeHandler}
-                      type="file"
-                      accept="image/*"
-                      className="col-span-3"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    disabled={updateUserIsLoading}
-                    onClick={updateUserHandler}
-                  >
-                    {updateUserIsLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please
-                        wait
-                      </>
-                    ) : (
-                      "Save Changes"
-                    )}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+
+                  <DialogFooter>
+                    <Button onClick={handleUpdate} disabled={updating}>
+                      {updating ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Saving...
+                        </>
+                      ) : (
+                        "Save Changes"
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
-        <div>
-          <h1 className="font-medium text-lg">Courses you're enrolled in</h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 my-5">
-            {user?.enrolledCourses.length === 0 ? (
-              <h1>You haven't enrolled yet</h1>
-            ) : (
-              user?.enrolledCourses.map((course) => (
-                <Course course={course} key={course._id} />
-              ))
-            )}
-          </div>
+      </div>
+
+      {/* 🔥 ENROLLED COURSES */}
+      <div className="mt-10">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Your Learning Courses</h2>
+          <span className="text-sm text-gray-500">
+            {user?.enrolledCourses?.length || 0} courses
+          </span>
         </div>
+
+        {user?.enrolledCourses?.length === 0 ? (
+          <div className="text-center py-10 bg-gray-100 dark:bg-gray-800 rounded-xl">
+            <p className="text-gray-500">
+              You haven’t enrolled in any course yet.
+            </p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {user.enrolledCourses.map((course) => (
+              <div className="transform hover:-translate-y-1 transition duration-300">
+                <Course key={course._id} course={course} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

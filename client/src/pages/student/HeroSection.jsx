@@ -1,5 +1,3 @@
-// import React from 'react'
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -11,7 +9,6 @@ function HeroSection() {
 
   const searchHandler = (e) => {
     e.preventDefault();
-    // alert(searchQuery);
     if (searchQuery.trim() !== "") {
       navigate(`/course/search?query=${searchQuery}`);
     }
@@ -19,41 +16,44 @@ function HeroSection() {
   };
 
   return (
-    <div className="">
-      <div className="relative bg-gradient-to-r from-blue-500 to bg-indigo-600 dark:from-gray-800 dark:to-gray-900 py-24 px-4 text-center">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-white text-4xl font-bold mb-4">
-            Find the Best Courses for You
-          </h1>
-          <p className="text-gray-200 dark:text-gray-400 mb-8">
-            Discover, Learn, and Upskill with our wide range of courses
-          </p>
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 dark:from-gray-900 dark:to-black px-4 text-center overflow-hidden">
+      {/* 🔥 Decorative blur shapes */}
+      <div className="absolute top-10 left-10 w-72 h-72 bg-purple-500/30 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-10 right-10 w-80 h-80 bg-blue-400/20 rounded-full blur-2xl animate-pulse"></div>
 
-          <form
-            onSubmit={searchHandler}
-            className="flex items-center bg-white dark:bg-gray-800 rounded-full shadow-lg overflow-hidden max-w-xl mx-auto mb-6"
-          >
-            <Input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Courses"
-              className="flex-grow border-none focus-visible:ring-0 px-6 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-            />
-            <Button
-              type="submit"
-              className="bg-blue-600 dark:bg-blue-700 text-white px-6 py-3 rounded-r-full hover:bg-blue-700 dark:hover:bg-blue-800"
-            >
-              Search
-            </Button>
-          </form>
-          <Button
-            onClick={() => navigate(`/course/search?query`)}
-            className="bg-white dark:bg-gray-800 text-blue-600 rounded-full hover:bg-gray-200"
-          >
-            Explore Courses
+      <div className="max-w-3xl mx-auto z-10">
+        <h1 className="text-white text-5xl md:text-6xl font-extrabold mb-4 drop-shadow-lg">
+          Learn Without Limits
+        </h1>
+
+        <p className="text-gray-100 text-lg md:text-xl mb-10">
+          Upgrade your skills with high-quality courses anytime, anywhere
+        </p>
+
+        {/* Search */}
+        <form
+          onSubmit={searchHandler}
+          className="flex items-center bg-white dark:bg-gray-800 rounded-full shadow-2xl overflow-hidden max-w-2xl mx-auto mb-6 hover:scale-105 transition"
+        >
+          <Input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search Courses..."
+            className="flex-grow border-none focus-visible:ring-0 px-6 py-4 text-gray-900 dark:text-gray-100"
+          />
+          <Button className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-white px-6 py-4 rounded-r-full">
+            Search
           </Button>
-        </div>
+        </form>
+
+        {/* CTA */}
+        <Button
+          onClick={() => navigate(`/course/search?query`)}
+          className="bg-white text-blue-600 px-8 py-3 rounded-full font-semibold hover:shadow-lg transform hover:-translate-y-1 transition"
+        >
+          Explore Courses
+        </Button>
       </div>
     </div>
   );

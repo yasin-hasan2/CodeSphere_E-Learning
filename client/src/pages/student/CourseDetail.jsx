@@ -14,6 +14,8 @@ import { BadgeInfo, Lock, PlayCircle } from "lucide-react";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
+import LoadingSpinner from "@/components/shared/LoadingSpinner";
+import ErrorPage from "@/pages/ErrorPage";
 
 // const course = {
 //   courseTitle: "Introduction to React",
@@ -55,13 +57,10 @@ function CourseDetail() {
   console.log("Course Detail Data:", data);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
-  if (!isSuccess) {
-    return <div>Failed to load course details.</div>;
-  }
-  if (isError) {
-    return <div>Error loading course details.</div>;
+  if (isError || !isSuccess) {
+    return <ErrorPage />;
   }
   const { course, isPurchased } = data;
 

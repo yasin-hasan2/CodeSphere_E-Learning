@@ -9,79 +9,118 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { DollarSign, ShoppingCart } from "lucide-react";
 
 const Dashboard = () => {
   const { data, isError, isLoading } = useGetPurchasedCoursesQuery();
-  // console.log("Purchased Courses Data:", data);
 
-  if (isLoading) return <h1>Loading...</h1>;
+  if (isLoading) return <DashboardSkeleton />;
   if (isError)
-    return <h1 className="text-red-500">Failed to get purchased course</h1>;
+    return (
+      <div className="text-center mt-10 text-red-500 font-medium">
+        Failed to load dashboard data
+      </div>
+    );
 
-  // //
   const purchasedCourses = data?.purchasedCourses || [];
 
-  const courseData = purchasedCourses?.map((course) => ({
+  const courseData = purchasedCourses.map((course) => ({
     name: course.courseId?.courseTitle,
     price: course.courseId?.coursePrice,
   }));
-  // console.log("course data", courseData);
 
   const totalRevenue = purchasedCourses.reduce(
-    (acc, element) => acc + (element.amount || 0),
-    0
+    (acc, el) => acc + (el.amount || 0),
+    0,
   );
 
   const totalSales = purchasedCourses.length;
+
   return (
-    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ">
-      <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-        <CardHeader>
-          <CardTitle>Total Sales</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-3xl font-bold text-blue-600">{totalSales}</p>
-        </CardContent>
-      </Card>
+    <div className="space-y-8">
+      {/* 🔥 PAGE HEADER */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">
+          Dashboard Overview
+        </h1>
+        <p className="text-sm text-gray-500">
+          Monitor your sales and course performance
+        </p>
+      </div>
 
-      <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-        <CardHeader>
-          <CardTitle>Total Revenue</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-3xl font-bold text-blue-600">{totalRevenue}</p>
-        </CardContent>
-      </Card>
+      {/* 🔥 STATS CARDS */}
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Total Sales */}
+        <Card className="rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300">
+          <CardContent className="p-6 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Total Sales</p>
+              <h2 className="text-3xl font-bold mt-1">{totalSales}</h2>
+            </div>
+            <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-xl">
+              <ShoppingCart className="text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Course Prices Card */}
-      <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4">
+        {/* Total Revenue */}
+        <Card className="rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300">
+          <CardContent className="p-6 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Total Revenue</p>
+              <h2 className="text-3xl font-bold mt-1">৳{totalRevenue}</h2>
+            </div>
+            <div className="bg-green-100 dark:bg-green-900 p-3 rounded-xl">
+              <DollarSign className="text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Extra Insight */}
+        <Card className="rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300">
+          <CardContent className="p-6">
+            <p className="text-sm text-gray-500">Avg Revenue per Sale</p>
+            <h2 className="text-3xl font-bold mt-1">
+              ৳{totalSales > 0 ? Math.round(totalRevenue / totalSales) : 0}
+            </h2>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 🔥 CHART SECTION */}
+      <Card className="rounded-2xl shadow-sm hover:shadow-md transition-all">
         <CardHeader>
-          <CardTitle className="text-xl font-semibold text-gray-700">
-            Course Prices
-          </CardTitle>
+          <CardTitle className="text-lg">Course Performance</CardTitle>
         </CardHeader>
+
         <CardContent>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={courseData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis
-                dataKey="name"
-                stroke="#6b7280"
-                angle={-30} // Rotated labels for better visibility
-                textAnchor="end"
-                interval={0} // Display all labels
-              />
-              <YAxis stroke="#6b7280" />
-              <Tooltip formatter={(value, name) => [`Tk${value}`, name]} />
-              <Line
-                type="monotone"
-                dataKey="price"
-                stroke="#4a90e2" // Changed color to a different shade of blue
-                strokeWidth={3}
-                dot={{ stroke: "#4a90e2", strokeWidth: 2 }} // Same color for the dot
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {courseData.length === 0 ? (
+            <div className="text-center text-gray-500 py-10">
+              No course data available yet
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={courseData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="name"
+                  angle={-25}
+                  textAnchor="end"
+                  interval={0}
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis />
+                <Tooltip formatter={(value) => [`৳${value}`, "Price"]} />
+                <Line
+                  type="monotone"
+                  dataKey="price"
+                  strokeWidth={3}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -89,3 +128,20 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+// 🔥 SKELETON LOADING
+const DashboardSkeleton = () => {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="h-6 w-40 bg-gray-300 rounded" />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-24 bg-gray-300 rounded-2xl" />
+        ))}
+      </div>
+
+      <div className="h-72 bg-gray-300 rounded-2xl" />
+    </div>
+  );
+};

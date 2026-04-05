@@ -1,3 +1,4 @@
+import Footer from "@/components/shared/Footer";
 import Navbar from "@/components/shared/Navbar";
 import HeroSection from "@/pages/student/HeroSection";
 import React from "react";
@@ -8,6 +9,7 @@ function MainLayout() {
     <div>
       <Navbar />
       <Outlet />
+      <Footer />
     </div>
   );
 }

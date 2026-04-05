@@ -1,12 +1,13 @@
 import { useGetCourseDetailWithStatusQuery } from "@/features/api/purchaseApi";
 import { Navigate, useParams } from "react-router-dom";
+import LoadingSpinner from "@/components/shared/LoadingSpinner";
 
 const PurchaseCourseProtectedRoute = ({ children }) => {
   const { courseId } = useParams();
   const { data, isLoading } = useGetCourseDetailWithStatusQuery(courseId);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   if (!data?.isPurchased) {

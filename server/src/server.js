@@ -44,7 +44,7 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 
 // middleware to parse JSON request body

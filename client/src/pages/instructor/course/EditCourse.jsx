@@ -1,24 +1,32 @@
 import { Button } from "@/components/ui/button";
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import CourseTab from "./CourseTab";
+import { ArrowRight } from "lucide-react";
 
 const EditCourse = () => {
-  const location = useLocation();
   return (
-    <div>
-      <div className="mb-2 text-sm text-blue-600">{location.pathname}</div>
-      <div className="flex-1">
-        <div className="flex items-center justify-between mb-5">
-          <h1 className="font-bold text-xl">
-            Add detail information regarding course
-          </h1>
-          <Link to="lecture">
-            <Button className="hover:text-blue-600" variant="link">
-              Go to lectures page
-            </Button>
-          </Link>
+    <div className="space-y-6">
+      {/* 🔥 HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Edit Course</h1>
+          <p className="text-sm text-gray-500">
+            Update your course details, content, and structure
+          </p>
         </div>
+
+        {/* CTA */}
+        <Link to="lecture">
+          <Button className="flex items-center gap-2">
+            Go to Lectures
+            <ArrowRight size={16} />
+          </Button>
+        </Link>
+      </div>
+
+      {/* 🔥 MAIN CONTENT */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm p-6">
+        {/* Tabs Section */}
         <CourseTab />
       </div>
     </div>

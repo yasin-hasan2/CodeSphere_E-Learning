@@ -1,57 +1,70 @@
-// import React from 'react'
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 
 function Course({ course }) {
   return (
-    <div>
-      <Link to={`/course-detail/${course._id}`}>
-        <Card className="overflow-hidden rounded-lg dark:bg-gray-800 bg-white shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
-          <div className="relative">
-            <img
-              src={course.courseThumbnail}
-              alt="course"
-              className="w-full h-36 object-cover rounded-t-lg"
-            />
-          </div>
-          <CardContent className="px-5 py-4 space-y-3">
-            <h1 className="hover:underline font-bold text-lg truncate">
-              {course.courseTitle}
-            </h1>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage
-                    src={
-                      course.courseTeacher?.photoUrl ||
-                      "https://github.com/shadcn.png"
-                    }
-                    alt="@shadcn"
-                  />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-                <h1 className="font-medium text-sm">
-                  {course.courseTeacher?.name}
-                </h1>
-              </div>
-              <Badge
-                className={
-                  "bg-blue-600 text-white px-2 py-1 text-xs rounded-full"
+    <Link to={`/course-detail/${course._id}`}>
+      <div className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition duration-500">
+        {/* 🔥 Thumbnail */}
+        <div className="relative overflow-hidden">
+          <img
+            src={course.courseThumbnail}
+            alt="course"
+            className="w-full h-44 object-cover transform group-hover:scale-110 transition duration-500"
+          />
+
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+          {/* Level badge */}
+          <Badge className="absolute top-3 left-3 bg-white/90 text-gray-900 backdrop-blur px-3 py-1 text-xs rounded-full">
+            {course.courseLevel}
+          </Badge>
+        </div>
+
+        {/* 🔥 Content */}
+        <div className="p-5 space-y-4">
+          {/* Title */}
+          <h3 className="font-semibold text-lg text-gray-900 dark:text-white line-clamp-2 group-hover:text-blue-500 transition">
+            {course.courseTitle}
+          </h3>
+
+          {/* Instructor */}
+          <div className="flex items-center gap-3">
+            <Avatar className="h-9 w-9">
+              <AvatarImage
+                src={
+                  course.courseTeacher?.photoUrl ||
+                  "https://github.com/shadcn.png"
                 }
-              >
-                {course.courseLevel}
-              </Badge>
-            </div>
-            <div className="text-lg font-bold">
-              <span>৳{course.coursePrice}</span>
-            </div>
-          </CardContent>
-        </Card>
-      </Link>
-    </div>
+              />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {course.courseTeacher?.name || "Instructor"}
+            </p>
+          </div>
+
+          {/* Rating + Students (demo) */}
+          <div className="flex items-center justify-between text-sm text-gray-500">
+            <span>⭐ 4.8</span>
+            <span>1.2k students</span>
+          </div>
+
+          {/* Price */}
+          <div className="flex items-center justify-between">
+            <span className="line-through text-gray-400 text-sm">৳1200</span>
+            <span className="text-green-500 text-sm">20% OFF</span>
+
+            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+              Bestseller
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }
 
