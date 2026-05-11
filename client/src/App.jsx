@@ -96,7 +96,11 @@ const appRouter = createBrowserRouter([
       },
       {
         path: "course-detail/:courseId",
-        element: <CourseDetail />,
+        element: (
+          <ProtectedRoutes>
+            <CourseDetail />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: "course-progress/:courseId",
